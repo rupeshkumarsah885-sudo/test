@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ऑनलाइन टेस्ट सीरीज़ पोर्टल</title>
+    <style>
+        :root { --primary: #2563eb; --secondary: #1e40af; --success: #16a34a; --danger: #dc2626; --whatsapp: #25d366; --bg: #f8fafc; --text: #1e293b; --card-bg: #ffffff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); padding: 10px; }
+        .container { max-width: 1000px; margin: auto; background: var(--card-bg); padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        
+        /* Header & Auth */
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .header-title-box h1 { font-size: 18px; color: var(--primary); }
+        .header-subtitle { font-size: 12px; font-weight: 600; color: #64748b; margin-top: 2px; }
+        .director-tag { font-size: 11px; font-weight: bold; background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; border: 1px solid #bae6fd; }
+        .user-info { font-weight: bold; color: #475569; font-size: 13px; }
+
+        /* Menu & Buttons */
+        .menu-btn { background: #e2e8f0; color: var(--text); border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .whatsapp-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--whatsapp); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .whatsapp-btn:active { transform: scale(0.95); }
+
+        /* Grids & Cards */
+        .folder-grid, .test-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 10px; margin-top: 10px; }
+        @media(min-width: 600px) {
+            .folder-grid, .test-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+        }
+        .card { background: #f1f5f9; border-left: 5px solid var(--primary); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card:active { transform: scale(0.98); background: #e2e8f0; }
+        .card h3 { font-size: 16px; color: var(--primary); margin-bottom: 4px; }
+        .card p { font-size: 13px; color: #64748b; }
+
+        .breadcrumb { font-size: 14px; font-weight: bold; color: var(--primary); margin-bottom: 12px; cursor: pointer; display: inline-block; background: #eff6ff; padding: 6px 12px; border-radius: 6px; border: 1px solid #bfdbfe; }
+
+        /* Auth Form Box */
+        .auth-box { max-width: 380px; margin: 10px auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .auth-box h2 { text-align: center; margin-bottom: 15px; color: var(--primary); font-size: 20px; }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px; font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn:active { opacity: 0.8; }
+        .toggle-link { text-align: center; margin-top: 12px; font-size: 13px; color: var(--primary); cursor: pointer; }
+
+        /* Quiz Layout */
+        .quiz-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #f1f5f9; padding: 8px 12px; border-radius: 8px; }
+        .quiz-layout { display: flex; flex-direction: column; gap: 15px; position: relative; }
+        @media(min-width: 768px) { .quiz-layout { flex-direction: row; } }
+        .quiz-main { flex: 3; }
+        
+        .quiz-sidebar { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; height: fit-content; max-height: 300px; overflow-y: auto; }
+        @media(min-width: 768px) { .quiz-sidebar { max-height: 450px; } }
+        .palette-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 8px; }
+        .palette-btn { aspect-ratio: 1; border: 1px solid #cbd5e1; background: #fff; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .palette-btn.attempted { background: var(--success); color: white; border-color: var(--success); }
+        .palette-btn.current { border: 2px solid var(--primary); transform: scale(1.05); }
+
+        .question-box { font-size: 16px; font-weight: bold; margin-bottom: 15px; line-height: 1.4; }
+        .option-label { display: block; background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; cursor: pointer; font-size: 15px; }
+        .option-label input { margin-right: 8px; }
+        
+        .quiz-footer { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+        .quiz-footer button { width: 50%; padding: 10px; font-size: 14px; }
+
+        /* Solution & Review */
+        .solution-box { background: #eff6ff; border-left: 4px solid var(--primary); padding: 10px; margin-top: 12px; border-radius: 4px; font-size: 14px; color: #1e3a8a; }
+        .correct-ans { background: #dcfce7 !important; border-color: var(--success) !important; color: #166534; font-weight: bold; }
+        .wrong-ans { background: #fee2e2 !important; border-color: var(--danger) !important; color: #991b1b; font-weight: bold; }
+        
+        /* Modal Popup for Menu */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #fff; width: 90%; max-width: 500px; padding: 20px; border-radius: 10px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 20px; font-weight: bold; cursor: pointer; color: var(--danger); }
+
+        .hidden { display: none !important; }
+        .loading { text-align: center; font-size: 16px; color: var(--primary); padding: 30px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loadingView" class="loading">🔄 तेज़ी से लोड हो रहा है...</div>
+
+    <!-- Login / Signup View -->
+    <div id="authView" class="hidden">
+        <div style="text-align: center; margin-bottom: 12px;">
+            <a href="https://wa.me/919546125299?text=Hello%20Mentors%20Classes,%20I%20need%20help%20with%20the%20test%20series." target="_blank" class="whatsapp-btn">
+                💬 WhatsApp Help (9546125299)
+            </a>
+        </div>
+
+        <div class="auth-box">
+            <h2 id="authTitle">छात्र लॉगिन (Login)</h2>
+            <div id="loginForm">
+                <div class="input-group">
+                    <label>मोबाइल नंबर</label>
+                    <input type="tel" id="loginMobile" placeholder="मोबाइल नंबर दर्ज करें">
+                </div>
+                <div class="input-group">
+                    <label>पासवर्ड</label>
+                    <input type="password" id="loginPassword" placeholder="पासवर्ड दर्ज करें">
+                </div>
+                <button class="btn" onclick="handleLogin()">लॉगिन करें</button>
+                <div class="toggle-link" onclick="toggleAuthMode('signup')">नया अकाउंट बनाएं? रजिस्टर करें</div>
+                <div class="toggle-link" style="color: #dc2626; margin-top: 5px;" onclick="handleForgotPassword()">पासवर्ड भूल गए?</div>
+                <div id="forgotResult" style="margin-top: 10px; font-weight: bold; text-align: center; color: var(--primary);"></div>
+            </div>
+
+            <div id="signupForm" class="hidden">
+                <div class="input-group">
+                    <label>पूरा नाम</label>
+                    <input type="text" id="signupName" placeholder="अपना नाम दर्ज करें">
+                </div>
+                <div class="input-group">
+                    <label>मोबाइल नंबर</label>
+                    <input type="tel" id="signupMobile" placeholder="मोबाइल नंबर दर्ज करें">
+                </div>
+                <div class="input-group">
+                    <label>नया पासवर्ड बनाएं</label>
+                    <input type="password" id="signupPassword" placeholder="नया पासवर्ड बनाएं">
+                </div>
+                <button class="btn" onclick="handleSignup()">रजिस्टर करें</button>
+                <div class="toggle-link" onclick="toggleAuthMode('login')">पहले से अकाउंट है? लॉगिन करें</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard View -->
+    <div id="dashboardView" class="hidden">
+        <div class="header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="menu-btn" onclick="openThreeLineMenu()">☰</button>
+                <div class="header-title-box">
+                    <h1>ऑनलाइन टेस्ट सीरीज़</h1>
+                    <div class="header-subtitle">Mentors Classes 1.0</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <a href="https://wa.me/919546125299?text=Hello%20Mentors%20Classes" target="_blank" class="whatsapp-btn">💬 Help</a>
+                <div class="director-tag">Rupesh Sir</div>
+                <span class="user-info" id="welcomeUser"></span>
+                <button class="btn" onclick="logout()" style="padding: 4px 8px; background: var(--danger); width: auto; font-size: 11px;">लॉग आउट</button>
+            </div>
+        </div>
+
+        <!-- Step 1: Class View -->
+        <div id="view-class">
+            <h3 style="margin-bottom: 8px; font-size: 15px;">अपनी कक्षा चुनें</h3>
+            <div class="folder-grid" id="grid-class"></div>
+        </div>
+
+        <!-- Step 2: Subject View -->
+        <div id="view-subject" class="hidden">
+            <div class="breadcrumb" onclick="renderClasses()">⬅ कक्षाएं बदलें</div>
+            <h3 id="title-subject" style="margin-bottom: 8px; font-size: 15px;">विषय</h3>
+            <div class="folder-grid" id="grid-subject"></div>
+        </div>
+
+        <!-- Step 3: Chapter View -->
+        <div id="view-chapter" class="hidden">
+            <div class="breadcrumb" onclick="renderSubjects()">⬅ विषय बदलें</div>
+            <h3 id="title-chapter" style="margin-bottom: 8px; font-size: 15px;">चैप्टर</h3>
+            <div class="folder-grid" id="grid-chapter"></div>
+        </div>
+
+        <!-- Step 4: Test Sets View -->
+        <div id="view-sets" class="hidden">
+            <div class="breadcrumb" onclick="renderChapters()">⬅ चैप्टर बदलें</div>
+            <h3 id="title-sets" style="margin-bottom: 8px; font-size: 15px;">टेस्ट सेट</h3>
+            <div class="test-grid" id="grid-sets"></div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="view-quiz" class="hidden">
+            <div class="breadcrumb" onclick="renderSets()">⬅ टेस्ट सेट बदलें</div>
+            <div class="quiz-top-bar">
+                <span id="quiz-breadcrumb" style="font-weight: bold; color: #475569; font-size: 12px;"></span>
+                <button class="menu-btn" onclick="toggleSidebar()" style="font-size: 13px; padding: 5px 8px;">प्रश्न सूची</button>
+            </div>
+            
+            <div class="quiz-layout">
+                <div class="quiz-main">
+                    <div style="font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: 14px;" id="question-counter"></div>
+                    <div class="question-box" id="questionText"></div>
+                    <div id="optionsContainer"></div>
+                    <div class="quiz-footer">
+                        <button class="btn" id="prevBtn" onclick="prevQuestion()" style="background: #64748b;">पिछला</button>
+                        <button class="btn" id="nextBtn" onclick="nextQuestion()">अगला</button>
+                    </div>
+                </div>
+                
+                <div class="quiz-sidebar" id="quizSidebar" style="display:none;">
+                    <h4 style="margin-bottom: 5px; font-size: 14px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">नेविगेशन</h4>
+                    <div class="palette-grid" id="paletteGrid"></div>
+                    <button class="btn" onclick="finishTest()" style="margin-top: 15px; background: var(--success); font-size: 13px; padding: 8px; width: 100%;">टेस्ट सबमिट करें</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result & Review View -->
+        <div id="view-result" class="hidden" style="text-align: center;">
+            <h2>🎉 टेस्ट संपन्न हुआ!</h2>
+            <div id="finalScoreText" style="font-size: 22px; font-weight: bold; color: var(--success); margin: 12px 0;"></div>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
+                <button class="btn" onclick="saveCurrentTestResult()" style="background: var(--success); width: auto;">💾 रिजल्ट सेव करें</button>
+                <button class="btn" onclick="showDashboardHome()" style="width: auto; background: #64748b;">डैशबोर्ड पर जाएं</button>
+            </div>
+            <div id="reviewList" style="text-align: left; margin-bottom: 15px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Three Line Menu Modal -->
+<div id="menuModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeThreeLineMenu()">&times;</span>
+        <h3 style="color: var(--primary); margin-bottom: 15px;">📂 सहेजे गए पिछले रिजल्ट्स</h3>
+        <div id="savedResultsContainer"></div>
+    </div>
+</div>
+
+<!-- Saved Result View Modal -->
+<div id="viewSavedResultModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeSavedResultView()">&times;</span>
+        <h3 id="savedResultTitle" style="color: var(--primary); margin-bottom: 10px;"></h3>
+        <div id="savedResultDetails"></div>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwDXEP8LoqSnR5K-i55mvZKvMdG1nieyBfhnVsuIq0-Fyod-ok6sN-Px5oZykNiPC2qxg/exec";
+
+    let allQuestions = [];
+    let allUsers = [];
+    let currentUser = null;
+    let currentSelection = { class: '', subject: '', chapter: '', set: '' };
+    let activeQuestions = [];
+    let currentQIndex = 0;
+    let userAnswers = {};
+    let deviceId = "";
+    let lastTestResultData = null;
+
+    function getDeviceId() {
+        let id = localStorage.getItem('device_id');
+        if (!id) {
+            id = 'DEV_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('device_id', id);
+        }
+        return id;
+    }
+
+    async function initApp() {
+        deviceId = getDeviceId();
+        let cachedQuestions = localStorage.getItem('cached_questions');
+        if (cachedQuestions) {
+            allQuestions = JSON.parse(cachedQuestions);
+            appReady();
+        }
+
+        try {
+            let resQ = await fetch(WEB_APP_URL);
+            let rawData = await resQ.json();
+            
+            let parsedQuestions = rawData.map(q => {
+                let findVal = (keys) => {
+                    for (let k of keys) {
+                        for (let prop in q) {
+                            if (prop.trim().toLowerCase() === k.toLowerCase()) {
+                                return q[prop] !== undefined ? String(q[prop]).trim() : "";
+                            }
+                        }
+                    }
+                    return "";
+                };
+
+                return {
+                    className: findVal(['className', 'class', 'कक्षा']),
+                    subjectName: findVal(['subjectName', 'subject', 'विषय']),
+                    chapterName: findVal(['chapterName', 'chapter', 'चैप्टर', 'अध्याय']),
+                    setName: findVal(['setName', 'set', 'सेट']),
+                    question: findVal(['question', 'que', 'प्रश्न']),
+                    optionA: findVal(['optionA', 'optA', 'a', 'विकल्प_a']),
+                    optionB: findVal(['optionB', 'optB', 'b', 'विकल्प_b']),
+                    optionC: findVal(['optionC', 'optC', 'c', 'विकल्प_c']),
+                    optionD: findVal(['optionD', 'optD', 'd', 'विकल्प_d']),
+                    answer: findVal(['answer', 'ans', 'सही_उत्तर']),
+                    solution: findVal(['solution', 'expl', 'स्पष्टीकरण'])
+                };
+            }).filter(q => q.question !== "" && q.className !== "");
+
+            if (parsedQuestions.length > 0) {
+                allQuestions = parsedQuestions;
+                localStorage.setItem('cached_questions', JSON.stringify(allQuestions));
+            }
+
+            let resU = await fetch(WEB_APP_URL + "?action=getUsers");
+            allUsers = await resU.json();
+            localStorage.setItem('cached_users', JSON.stringify(allUsers));
+
+            if (!cachedQuestions) appReady();
+        } catch (err) {
+            if (!cachedQuestions) {
+                document.getElementById('loadingView').innerText = "❌ इंटरनेट कनेक्शन जांचें।";
+            } else {
+                appReady();
+            }
+        }
+    }
+
+    function appReady() {
+        document.getElementById('loadingView').classList.add('hidden');
+        let savedUser = localStorage.getItem('logged_user');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            startDashboard();
+        } else {
+            document.getElementById('authView').classList.remove('hidden');
+        }
+    }
+
+    function toggleAuthMode(mode) {
+        if(mode === 'signup') {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('signupForm').classList.remove('hidden');
+            document.getElementById('authTitle').innerText = "छात्र रजिस्ट्रेशन";
+        } else {
+            document.getElementById('signupForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('authTitle').innerText = "छात्र लॉगिन";
+        }
+    }
+
+    async function handleSignup() {
+        let name = document.getElementById('signupName').value.trim();
+        let mobile = document.getElementById('signupMobile').value.trim();
+        let password = document.getElementById('signupPassword').value.trim();
+        if(!name || !mobile || !password) { alert("कृपया सभी विवरण भरें!"); return; }
+
+        try {
+            let res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ name, mobile, password, deviceId }) });
+            let result = await res.json();
+            alert(result.message);
+            if(result.status === "success") toggleAuthMode('login');
+        } catch(e) { alert("रजिस्ट्रेशन में समस्या आई।"); }
+    }
+
+    async function handleLogin() {
+        let mobile = document.getElementById('loginMobile').value.trim();
+        let password = document.getElementById('loginPassword').value.trim();
+        let cachedUsers = localStorage.getItem('cached_users');
+        if(cachedUsers) allUsers = JSON.parse(cachedUsers);
+
+        let user = allUsers.find(u => u.mobile == mobile && u.password == password);
+        if(user) {
+            if(user.status === "Inactive") { alert("आपका अकाउंट Inactive है।"); return; }
+            currentUser = user;
+            localStorage.setItem('logged_user', JSON.stringify(user));
+            startDashboard();
+        } else { alert("गलत मोबाइल नंबर या पासवर्ड!"); }
+    }
+
+    async function handleForgotPassword() {
+        let mobile = document.getElementById('loginMobile').value.trim();
+        if(!mobile) { document.getElementById('forgotResult').innerText = "मोबाइल नंबर दर्ज करें!"; return; }
+        let cachedUsers = localStorage.getItem('cached_users');
+        if(cachedUsers) allUsers = JSON.parse(cachedUsers);
+        let user = allUsers.find(u => u.mobile == mobile);
+        if(user) { document.getElementById('forgotResult').innerHTML = `पासवर्ड: <span style="color:var(--danger);">${user.password}</span>`; }
+        else { document.getElementById('forgotResult').innerText = "अकाउंट नहीं मिला।"; }
+    }
+
+    function logout() {
+        localStorage.removeItem('logged_user');
+        currentUser = null;
+        document.getElementById('dashboardView').classList.add('hidden');
+        document.getElementById('authView').classList.remove('hidden');
+    }
+
+    function startDashboard() {
+        document.getElementById('authView').classList.add('hidden');
+        document.getElementById('dashboardView').classList.remove('hidden');
+        document.getElementById('welcomeUser').innerText = `👤 ${currentUser.name}`;
+        renderClasses();
+    }
+
+    function showView(viewId) {
+        ['view-class', 'view-subject', 'view-chapter', 'view-sets', 'view-quiz', 'view-result'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    function showDashboardHome() { showView('view-class'); }
+
+    function renderClasses() {
+        let grid = document.getElementById('grid-class');
+        grid.innerHTML = "";
+        let classes = [...new Set(allQuestions.map(q => q.className))].filter(Boolean);
+        classes.forEach(cls => {
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>📁 ${cls}</h3><p>क्लिक करें</p>`;
+            card.onclick = () => { currentSelection.class = cls; renderSubjects(); };
+            grid.appendChild(card);
+        });
+        showView('view-class');
+    }
+
+    function renderSubjects() {
+        let grid = document.getElementById('grid-subject');
+        grid.innerHTML = "";
+        document.getElementById('title-subject').innerText = `कक्षा: ${currentSelection.class}`;
+        let subjects = [...new Set(allQuestions.filter(q => q.className === currentSelection.class).map(q => q.subjectName))].filter(Boolean);
+        subjects.forEach(sub => {
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>📂 ${sub}</h3><p>विषय खोलें</p>`;
+            card.onclick = () => { currentSelection.subject = sub; renderChapters(); };
+            grid.appendChild(card);
+        });
+        showView('view-subject');
+    }
+
+    function renderChapters() {
+        let grid = document.getElementById('grid-chapter');
+        grid.innerHTML = "";
+        document.getElementById('title-chapter').innerText = `${currentSelection.subject}`;
+        let chapters = [...new Set(allQuestions.filter(q => q.className === currentSelection.class && q.subjectName === currentSelection.subject).map(q => q.chapterName))].filter(Boolean);
+        chapters.forEach(ch => {
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>📖 ${ch}</h3><p>चैप्टर खोलें</p>`;
+            card.onclick = () => { currentSelection.chapter = ch; renderSets(); };
+            grid.appendChild(card);
+        });
+        showView('view-chapter');
+    }
+
+    function renderSets() {
+        let grid = document.getElementById('grid-sets');
+        grid.innerHTML = "";
+        document.getElementById('title-sets').innerText = `${currentSelection.chapter}`;
+        let sets = {};
+        allQuestions.filter(q => q.className === currentSelection.class && q.subjectName === currentSelection.subject && q.chapterName === currentSelection.chapter).forEach(q => {
+            if(!sets[q.setName]) sets[q.setName] = 0;
+            sets[q.setName]++;
+        });
+        for(let setName in sets) {
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>📝 ${setName}</h3><p>कुल प्रश्न: ${sets[setName]}</p>`;
+            card.onclick = () => startTest(setName);
+            grid.appendChild(card);
+        }
+        showView('view-sets');
+    }
+
+    function startTest(setName) {
+        currentSelection.set = setName;
+        activeQuestions = allQuestions.filter(q => q.className === currentSelection.class && q.subjectName === currentSelection.subject && q.chapterName === currentSelection.chapter && q.setName === setName);
+        currentQIndex = 0;
+        userAnswers = {};
+        document.getElementById('quiz-breadcrumb').innerText = `${setName}`;
+        showView('view-quiz');
+        buildQuestionPalette();
+        renderQuestion();
+    }
+
+    function buildQuestionPalette() {
+        let paletteGrid = document.getElementById('paletteGrid');
+        paletteGrid.innerHTML = "";
+        activeQuestions.forEach((q, idx) => {
+            let btn = document.createElement('button');
+            btn.className = 'palette-btn';
+            btn.id = `palette_btn_${idx}`;
+            btn.innerText = idx + 1;
+            btn.onclick = () => jumpToQuestion(idx);
+            paletteGrid.appendChild(btn);
+        });
+    }
+
+    function jumpToQuestion(index) { currentQIndex = index; renderQuestion(); }
+    function toggleSidebar() {
+        let sidebar = document.getElementById('quizSidebar');
+        sidebar.style.display = sidebar.style.display === "none" ? "block" : "none";
+    }
+
+    function renderQuestion() {
+        let q = activeQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `प्रश्न ${currentQIndex + 1} / ${activeQuestions.length}`;
+        document.getElementById('questionText').innerText = `${currentQIndex + 1}. ${q.question}`;
+        let optContainer = document.getElementById('optionsContainer');
+        optContainer.innerHTML = "";
+        ['A', 'B', 'C', 'D'].forEach((opt, idx) => {
+            let optKey = ['optionA', 'optionB', 'optionC', 'optionD'][idx];
+            let checked = userAnswers[currentQIndex] === opt ? 'checked' : '';
+            optContainer.innerHTML += `
+                <label class="option-label">
+                    <input type="radio" name="quizOpt" value="${opt}" ${checked} onclick="selectOption('${opt}')">
+                    <b>${opt}.</b> ${q[optKey]}
+                </label>`;
+        });
+        document.getElementById('prevBtn').style.display = currentQIndex === 0 ? 'none' : 'inline-block';
+        document.getElementById('nextBtn').innerText = currentQIndex === activeQuestions.length - 1 ? 'अंतिम' : 'अगला';
+        updatePaletteUI();
+    }
+
+    function selectOption(opt) { userAnswers[currentQIndex] = opt; updatePaletteUI(); }
+    function updatePaletteUI() {
+        activeQuestions.forEach((q, idx) => {
+            let btn = document.getElementById(`palette_btn_${idx}`);
+            if(btn) {
+                btn.classList.remove('current', 'attempted');
+                if(idx === currentQIndex) btn.classList.add('current');
+                if(userAnswers[idx]) btn.classList.add('attempted');
+            }
+        });
+    }
+
+    function nextQuestion() { if(currentQIndex < activeQuestions.length - 1) { currentQIndex++; renderQuestion(); } }
+    function prevQuestion() { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); } }
+
+    function finishTest() {
+        if(confirm("टेस्ट सबमिट करें?")) {
+            let score = 0;
+            let reviewHtml = "";
+            let detailedReviewData = [];
+
+            activeQuestions.forEach((q, idx) => {
+                let userAns = userAnswers[idx] || "N/A";
+                let isCorrect = (userAns.toUpperCase() === q.answer.toUpperCase());
+                if(isCorrect) score++;
+
+                detailedReviewData.push({
+                    question: q.question,
+                    options: [q.optionA, q.optionB, q.optionC, q.optionD],
+                    correctAnswer: q.answer.toUpperCase(),
+                    userAnswer: userAns,
+                    solution: q.solution
+                });
+
+                reviewHtml += `<div style="background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:8px; margin-bottom:12px;">
+                    <div style="font-weight:bold; margin-bottom:6px; font-size:14px;">${idx + 1}. ${q.question}</div>`;
+
+                ['A', 'B', 'C', 'D'].forEach((opt, oIdx) => {
+                    let optKey = ['optionA', 'optionB', 'optionC', 'optionD'][oIdx];
+                    let cls = "";
+                    if(opt === q.answer.toUpperCase()) cls = "correct-ans";
+                    else if(opt === userAns && !isCorrect) cls = "wrong-ans";
+                    reviewHtml += `<div class="option-label ${cls}" style="padding:6px 10px; margin:3px 0; font-size:14px;"><b>${opt}.</b> ${q[optKey]}</div>`;
+                });
+
+                if(q.solution && q.solution.trim() !== "") {
+                    reviewHtml += `<div class="solution-box"><b>💡 स्पष्टीकरण:</b> ${q.solution}</div>`;
+                }
+                reviewHtml += `</div>`;
+            });
+
+            lastTestResultData = {
+                id: 'RES_' + Date.now(),
+                mobile: currentUser.mobile,
+                title: `${currentSelection.subject} - ${currentSelection.chapter} (${currentSelection.set})`,
+                date: new Date().toLocaleString('hi-IN'),
+                score: score,
+                total: activeQuestions.length,
+                details: detailedReviewData
+            };
+
+            document.getElementById('finalScoreText').innerText = `आपका स्कोर: ${score} / ${activeQuestions.length}`;
+            document.getElementById('reviewList').innerHTML = reviewHtml;
+            showView('view-result');
+        }
+    }
+
+    // Save Result to Local Storage
+    function saveCurrentTestResult() {
+        if(!lastTestResultData) return;
+        let savedResults = JSON.parse(localStorage.getItem('saved_test_results') || '[]');
+        savedResults.unshift(lastTestResultData); // सबसे ऊपर जोड़ें
+        localStorage.setItem('saved_test_results', JSON.stringify(savedResults));
+        alert("✅ आपका रिजल्ट आपके डिवाइस में सफलतापूर्वक सेव हो गया है! अब आप इसे थ्री-लाइन मेनू में देख सकते हैं।");
+    }
+
+    // Three Line Menu Functions
+    function openThreeLineMenu() {
+        let modal = document.getElementById('menuModal');
+        modal.classList.remove('hidden');
+        renderSavedResultsList();
+    }
+
+    function closeThreeLineMenu() {
+        document.getElementById('menuModal').classList.add('hidden');
+    }
+
+    function renderSavedResultsList() {
+        let container = document.getElementById('savedResultsContainer');
+        container.innerHTML = "";
+        let savedResults = JSON.parse(localStorage.getItem('saved_test_results') || '[]').filter(r => r.mobile === currentUser.mobile);
+
+        if(savedResults.length === 0) {
+            container.innerHTML = `<p style="color: #64748b; text-align: center; padding: 20px;">कोई भी सहेजा गया रिजल्ट नहीं मिला।</p>`;
+            return;
+        }
+
+        savedResults.forEach((res) => {
+            let card = document.createElement('div');
+            card.style = "background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--success);";
+            card.innerHTML = `
+                <div style="font-weight: bold; font-size: 14px; color: var(--primary);">${res.title}</div>
+                <div style="font-size: 12px; color: #64748b; margin: 4px 0;">दिनांक: ${res.date} | स्कोर: <b>${res.score} / ${res.total}</b></div>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button class="btn" style="padding: 5px 10px; font-size: 12px;" onclick="viewSavedResult('${res.id}')">खोलकर देखें</button>
+                    <button class="btn" style="padding: 5px 10px; font-size: 12px; background: var(--danger);" onclick="confirmDeleteResult('${res.id}')">डिलीट करें</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function viewSavedResult(id) {
+        let savedResults = JSON.parse(localStorage.getItem('saved_test_results') || '[]');
+        let res = savedResults.find(r => r.id === id);
+        if(!res) return;
+
+        document.getElementById('savedResultTitle').innerText = `${res.title} (स्कोर: ${res.score}/${res.total})`;
+        let detailsHtml = "";
+
+        res.details.forEach((d, idx) => {
+            detailsHtml += `<div style="background:#f8fafc; border:1px solid #cbd5e1; padding:10px; border-radius:6px; margin-bottom:10px;">
+                <div style="font-weight:bold; font-size:13px; margin-bottom:4px;">${idx + 1}. ${d.question}</div>`;
+            
+            ['A', 'B', 'C', 'D'].forEach((opt, oIdx) => {
+                let cls = "";
+                if(opt === d.correctAnswer) cls = "correct-ans";
+                else if(opt === d.userAnswer && d.userAnswer !== d.correctAnswer) cls = "wrong-ans";
+                detailsHtml += `<div class="option-label ${cls}" style="padding:4px 8px; margin:2px 0; font-size:13px;"><b>${opt}.</b> ${d.options[oIdx]}</div>`;
+            });
+            if(d.solution) detailsHtml += `<div class="solution-box" style="font-size:13px;"><b>💡 स्पष्टीकरण:</b> ${d.solution}</div>`;
+            detailsHtml += `</div>`;
+        });
+
+        document.getElementById('savedResultDetails').innerHTML = detailsHtml;
+        document.getElementById('viewSavedResultModal').classList.remove('hidden');
+    }
+
+    function closeSavedResultView() {
+        document.getElementById('viewSavedResultModal').classList.add('hidden');
+    }
+
+    // Delete Popup Confirmation
+    function confirmDeleteResult(id) {
+        if(confirm("क्या आप वाकई इस सहेजे गए रिजल्ट को डिलीट करना चाहते हैं?")) {
+            let savedResults = JSON.parse(localStorage.getItem('saved_test_results') || '[]');
+            savedResults = savedResults.filter(r => r.id !== id);
+            localStorage.setItem('saved_test_results', JSON.stringify(savedResults));
+            renderSavedResultsList(); // लिस्ट रिफ्रेश करें
+            alert("🗑️ रिजल्ट सफलतापूर्वक डिलीट कर दिया गया है।");
+        }
+    }
+
+    initApp();
+</script>
+
+</body>
+</html>
